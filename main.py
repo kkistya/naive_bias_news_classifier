@@ -2,7 +2,8 @@ import requests
 from time import sleep
 from bs4 import BeautifulSoup
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
+# from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -17,6 +18,7 @@ links = soup.find_all('a')
 # parce all the links
 pages = []
 targets = []
+
 for _ in links:
     link = _['href']
     category = ''
@@ -38,6 +40,7 @@ for _ in links:
 
         pages.append(all_text)
         targets.append(category)
+
         sleep(0.5)
     except requests.exceptions.RequestException as e:
         print(f"smth went wrong for {link}: {e}")
@@ -50,9 +53,8 @@ x = vectorizer.fit_transform(pages)
 label_encoder = LabelEncoder()
 y = label_encoder.fit_transform(targets)
 
-model = LogisticRegression()
+model = MultinomialNB()  # or LogisticRegression()
 model.fit(x, y)
-
 
 
 # make prediction:
@@ -71,7 +73,6 @@ for url in predict_urls:
 
 X_text = vectorizer.transform(all_text)
 
-prediction_probab = model.predict_proba(X_text)
 predicted_category = model.predict(X_text)
 predicted_category_name = label_encoder.inverse_transform(predicted_category)
-print(f"Most likely categories: {predicted_category_name}; Probability: {prediction_probab}")
+print(f"Most likely categories: {predicted_category_name})")
